@@ -2395,7 +2395,8 @@ var MWBarcodeScanner = {
 
             // Add a small timeout before capturing first frame otherwise
             // we would get an 'Invalid state' error from 'getPreviewFrameAsync'
-            return WinJS.Promise.timeout(200)
+            // return WinJS.Promise.timeout(200)
+            return WinJS.Promise.timeout(CAMERA_STREAM_STATE_CHECK_RETRY_TIMEOUT)
             .then(function () {
                 return reader.readCode();
             });
