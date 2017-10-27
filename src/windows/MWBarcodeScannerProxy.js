@@ -11,7 +11,7 @@
 var urlutil = require('cordova/urlutil');
 
 
-var CAMERA_STREAM_STATE_CHECK_RETRY_TIMEOUT = 200; // milliseconds
+var CAMERA_STREAM_STATE_CHECK_RETRY_TIMEOUT = 2000; // milliseconds
 var OPERATION_IS_IN_PROGRESS = -2147024567;
 var INITIAL_FOCUS_DELAY = 200; // milliseconds
 var CHECK_PLAYING_TIMEOUT = 100; // milliseconds
@@ -122,11 +122,11 @@ var DOM_complete = false;
 
 var fullscreenButtons = {
     flashReference: null,
-	flashControlRef: null,					  
-	flashControlRef_enabled: false,							   
+	flashControlRef: null,
+	flashControlRef_enabled: false,
     flashState: 0,
     zoomReference: null,
-	zoomControlRef: null,					 
+	zoomControlRef: null,
     zoomState: 0,
     zoom_lvl_ini: 0,
     zoomLevels: [1, 2, 4],
@@ -441,9 +441,9 @@ BarcodeReader.prototype.readCode = function () {
 
             var width = 0;
             var height = 0;
-			
+
             var retArray = WindowsComponnent.ScannerPage.convertToGrayscale(bitmap, width, height);
-            
+
             capturedFrame.close();
 
             if ((retArray.value.length == 1) && (retArray.value[0] == 0)) return null;
@@ -455,7 +455,7 @@ BarcodeReader.prototype.readCode = function () {
     var self = this;
     return scanBarcodeAsync(this._capture,  this._width, this._height)
     .then(function (result) {
-		
+
         if (self._cancelled)
             return null;
 
@@ -558,7 +558,7 @@ var MWBarcodeScanner = {
             videoEncodingProperties.properties.insert(ROTATION_KEY, rotDegree);
 
             if (debug_print) console.log('\nON ORIENTATION CHANGE ');
-            
+
             // update style depending on orientation
             switch (currentOrientation) {
                 case Windows.Graphics.Display.DisplayOrientations.landscape:
@@ -583,7 +583,7 @@ var MWBarcodeScanner = {
 
             // PREVIEW UPDATE SHOULD BE DONE AFTER UI CHANGE WHICH MAY TAKE SOME TIME TO COMPLETE RENDERING AFTER ORIENTATION CHANGE | HANDLED BY window.resizeEvent->resizeCanvas
             if (firstTimeUpdate) { resizeCanvas(); firstTimeUpdate = false; }
-            
+
 
             if (operatingSystem == 'WindowsPhone')
                 return capture.setEncodingPropertiesAsync(Windows.Media.Capture.MediaStreamType.videoPreview, videoEncodingProperties, null);
@@ -626,7 +626,7 @@ var MWBarcodeScanner = {
         function resizeCanvas() {
             // get viewfinder (landscape)
             var viewfinderUnionRect = WindowsComponnent.BarcodeHelper.mwBgetScanningRect(0);
-			
+
             if (debug_print) console.log('resizeCanvas | window size ' + window.innerWidth + ' ' + window.innerHeight);
 
             // improve UIX during update | users don't need to see the underlying changes only the final result
@@ -667,7 +667,7 @@ var MWBarcodeScanner = {
             canvasOverlay.height = window.innerHeight;
 
             /**
-             * Your drawings need to be inside this function otherwise they will be reset when 
+             * Your drawings need to be inside this function otherwise they will be reset when
              * you resize the browser window and the canvas will be cleared.
              */
 
@@ -713,7 +713,7 @@ var MWBarcodeScanner = {
                     canvasBlinkingLineH.style.display = "initial";
                 }
             }, 1000);
-            
+
         }
 
         function onResume() {
@@ -963,7 +963,7 @@ var MWBarcodeScanner = {
 
             focusControl.configure(focusConfig);
 
-            // Continuous focus should start only after preview has started. See 'Remarks' at 
+            // Continuous focus should start only after preview has started. See 'Remarks' at
             // https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.devices.focuscontrol.configure.aspx
             function waitForIsPlaying() {
                 var isPlaying = !capturePreview.paused && !capturePreview.ended && capturePreview.readyState > 2;
@@ -1052,7 +1052,7 @@ var MWBarcodeScanner = {
                     zoomSettings.value = fullscreenButtons.zoomLevels[fullscreenButtons.zoom_lvl_ini];
 
                     zoomSettings.mode = zoomControl.supportedModes.first();
-                    zoomControl.configure(zoomSettings);					  
+                    zoomControl.configure(zoomSettings);
 
                     fullscreenButtons.zoomReference.getElementsByTagName("img")[0].src = fullscreenButtons.zoom0;
                 }
@@ -1071,8 +1071,8 @@ var MWBarcodeScanner = {
                     // sort properties by resolution
                     return propB.width - propA.width;
                 });
-				
-				// find a resolution as USE_CAMERA_RESOLUTION or the next lower available 
+
+				// find a resolution as USE_CAMERA_RESOLUTION or the next lower available
                 var resolutionListIndex = 0;
                 var resolutionListLength = deviceProps.length;
 
@@ -1177,7 +1177,7 @@ var MWBarcodeScanner = {
          */
         function cancelPreview() {
             reader && reader.stop();
-			
+
 			anyScannerStarted = false;
 			anyReader = null;
 			//document.getElementById("b1").disabled = false;
@@ -1206,7 +1206,8 @@ var MWBarcodeScanner = {
 
             // Add a small timeout before capturing first frame otherwise
             // we would get an 'Invalid state' error from 'getPreviewFrameAsync'
-            return WinJS.Promise.timeout(200)
+            // return WinJS.Promise.timeout(200)
+            return WinJS.Promise.timeout(CAMERA_STREAM_STATE_CHECK_RETRY_TIMEOUT)
             .then(function () {
                 return reader.readCode();
             });
@@ -1335,7 +1336,7 @@ var MWBarcodeScanner = {
 
                         ctx.stroke();
                     }
-                    
+
                     //ctx.beginPath();
                     //ctx.moveTo(x1, y1);
                     //ctx.lineTo(x2, y2);
@@ -1351,15 +1352,15 @@ var MWBarcodeScanner = {
             .then(function () {
                 return result;
             });
-        })								 
+        })
         .done(function (result) {
             destroyPreview();
-			
+
 			anyScannerStarted = false;
 			anyReader = null;
 			//document.getElementById("b1").disabled = false;
 			//document.getElementById("b2").disabled = false;
-			
+
             /**
                * result.code - string representation of barcode result
                * result.type - type of barcode detected or 'Cancel' if scanning is canceled
@@ -1384,7 +1385,7 @@ var MWBarcodeScanner = {
             fail(error);
         });
     },
-	
+
 	/**
      * Scans partial image via device camera and retieves barcode from it.
      * @param  {function} success Success callback
@@ -1403,7 +1404,7 @@ var MWBarcodeScanner = {
 
             var capturePreviewFrame; // needed here because unlike fullscreen it's properties will be altered
             var proxyWrapCapturePreview;
-		
+
 		var canvasOverlay;
         var canvasBlinkingLineV, canvasBlinkingLineH;
 
@@ -1463,9 +1464,9 @@ var MWBarcodeScanner = {
             // rotate the preview video
             var videoEncodingProperties = capture.videoDeviceController.getMediaStreamProperties(Windows.Media.Capture.MediaStreamType.videoPreview);
             videoEncodingProperties.properties.insert(ROTATION_KEY, rotDegree);
-			
+
             if (debug_print) console.log('\nON ORIENTATION CHANGE ');
-			
+
 			if (debug_print)
 			{
 			    console.log('currentOrientation' + currentOrientation);
@@ -1493,10 +1494,10 @@ var MWBarcodeScanner = {
                 default:
                     /*none*/
             }
-			
+
             // PREVIEW UPDATE SHOULD BE DONE AFTER UI CHANGE WHICH MAY TAKE SOME TIME TO COMPLETE RENDERING AFTER ORIENTATION CHANGE | HANDLED BY window.resizeEvent->resizePartialScannerView
             if (firstTimeUpdate) { resizePartialScannerView(); firstTimeUpdate = false; }
-			
+
 
             if (operatingSystem == 'WindowsPhone')
                 return capture.setEncodingPropertiesAsync(Windows.Media.Capture.MediaStreamType.videoPreview, videoEncodingProperties, null);
@@ -1508,7 +1509,7 @@ var MWBarcodeScanner = {
          * Resize partial scanning view.
          */
         resizePartialScannerView = function resizeView(/*x1, y1, w1, h1*/) {
-				
+
 			if (debug_print) console.log('resizePartialView | window size ' + window.innerWidth + ' ' + window.innerHeight);
 
             // USE THIS IF YOU WANT TO STORE THE VALUES OF THE RESIZE FOR THE NEXT SCAN
@@ -1660,24 +1661,24 @@ var MWBarcodeScanner = {
             if (debug_print) console.log('calcScanningRect(' + is_portrait + ' ' + _isDivArHigher + ' ' + _croppedCameraAreaScale + ') ');
 
             var viewfinderAreaScale = (1 - _croppedCameraAreaScale);
-            
+
             // determine if cutting is done by width or height
             if ((!is_portrait && _isDivArHigher) || (is_portrait && !_isDivArHigher))
             {
-                // it's done by height, rare                
-                var codeMask, 
+                // it's done by height, rare
+                var codeMask,
                     scanningRectTM;
 
                 var _i = 0;
                 for (; _i < numberOfSupporedCodes; _i++) {
-                    
+
                     // copy needed primitive types BY VALUE | these functions create new structures and assign primitive types by value | no ref here
                     scanningRectTM = rotateLandscape_toOrientation(untouchedScanningRectsArray[_i], viewfinderOnScreenView.orientation);
                     scanningRectTM = scaleFull_toPartial(scanningRectTM, viewfinderAreaScale, heightIndex);
 
                     // create rect
                     var csharpScanningRectTM = WindowsComponnent.BarcodeHelper.createRect(scanningRectTM.x, scanningRectTM.y, scanningRectTM.width, scanningRectTM.height);
-                    
+
                     // set in decoder
                     codeMask = codeMasksArray[_i];
                     WindowsComponnent.BarcodeHelper.mwBsetScanningRect(codeMask, csharpScanningRectTM);
@@ -1691,7 +1692,7 @@ var MWBarcodeScanner = {
 
                 var _i = 0;
                 for (; _i < numberOfSupporedCodes; _i++) {
-                    
+
                     // copy needed primitive types BY VALUE | these functions create new structures and assign primitive types by value | no ref here
                     scanningRectTM = rotateLandscape_toOrientation(untouchedScanningRectsArray[_i], viewfinderOnScreenView.orientation);
                     scanningRectTM = scaleFull_toPartial(scanningRectTM, viewfinderAreaScale, widthIndex);
@@ -1704,7 +1705,7 @@ var MWBarcodeScanner = {
                     WindowsComponnent.BarcodeHelper.mwBsetScanningRect(codeMask, csharpScanningRectTM);
                 }
             }
-			
+
             if (debug_print) {
 				//get viewfinder
 				var viewfnderUnionRect = WindowsComponnent.BarcodeHelper.mwBgetScanningRect(0);
@@ -1716,24 +1717,24 @@ var MWBarcodeScanner = {
          * Calculates overlay coordinates for canvas and calls calcScanningRect.
          */
         function calcPreview(is_portrait) {
-			
+
             if (debug_print) console.log('calcPreview(' + is_portrait + ') ');
-			
+
             var windowWidth = window.innerWidth;
             var windowHeight = window.innerHeight;
             var window_AR = windowWidth / windowHeight;
-			
+
             var rootDivInviewTop = document.getElementById("root-div-inview").offsetTop;
             var rootDivInviewLeft = document.getElementById("root-div-inview").offsetLeft;
-			
+
             var rootDivInviewWidth = document.getElementById("root-div-inview").offsetWidth;
             var rootDivInviewHeigth = document.getElementById("root-div-inview").offsetHeight;
             var rootDivInview_AR = rootDivInviewWidth / rootDivInviewHeigth;
-			
+
             var cameraWidth = HARDWARE_CAMERA_RESOLUTION.width;
             var cameraHeight = HARDWARE_CAMERA_RESOLUTION.height;
             var camera_AR = cameraWidth / cameraHeight;
-			
+
             if (is_portrait) {
                 cameraWidth = HARDWARE_CAMERA_RESOLUTION.height;
                 cameraHeight = HARDWARE_CAMERA_RESOLUTION.width;
@@ -1748,13 +1749,13 @@ var MWBarcodeScanner = {
                     var scalingFactor = rootDivInviewWidth / cameraWidth;
                     var new_cameraHeight = cameraHeight * scalingFactor;
                     var croppedCameraArea = new_cameraHeight - rootDivInviewHeigth;
-					
+
 					// get percentages:
 					var croppedCameraAreaScale = croppedCameraArea / new_cameraHeight;
                     var translatedCameraTopP = -(croppedCameraAreaScale / 2) * 100;
-					
+
                     capturePreview.style.cssText = "position: absolute; margin: auto; top: 0; bottom: 0; width: 100%; height: auto;";
-					
+
                     calcScanningRect(is_portrait, true, croppedCameraAreaScale);
                 }
                 else
@@ -1771,9 +1772,9 @@ var MWBarcodeScanner = {
 
                         var croppedinDivAreaScale = croppedCameraArea / rootDivInviewWidth;
                         var translateinDivLeftP = -(croppedinDivAreaScale / 2) * 100;
-						
+
                         capturePreview.style.cssText = "position: absolute; margin-left: " + translateinDivLeftP + "%; width: auto; height: 100%;";
-						
+
                         calcScanningRect(is_portrait, false, croppedCameraAreaScale);
                     }
         }
@@ -1802,7 +1803,7 @@ var MWBarcodeScanner = {
 
             canvasBlinkingLineH.height = lineThickness;
             canvasBlinkingLineH.style.top = (startTop + (h1 / 2) - (canvasBlinkingLineH.height / 2) - 0) + "px";
-			
+
 			// NOTE: at the time this is called the canvas lines have already been added to the html document and the animation has been started and can't be changed at this point
 			// SOLUTION: execute these instructions in createPreview before canvas lines are added (because resize and subsequently this function is called after)
 			//canvasBlinkingLineV.style.backgroundColor = canvasBlinkingLineH.style.backgroundColor = mwOverlayProperties.lineColor;
@@ -1815,7 +1816,7 @@ var MWBarcodeScanner = {
         function resizeCanvas() {
             // get viewfinder (landscape)
             var viewfinderUnionRect = untouchedScanningRectsUnion; // it's a pointer, but it doesn't matter since no changes will be made
-			
+
 			if (debug_print) console.log('resizeCanvas ');
 
             // set canvas over preview
@@ -1826,7 +1827,7 @@ var MWBarcodeScanner = {
 
             // linking image buttons to position
             fullscreenButtons.flashReference.style.top = (canvasOverlay.offsetTop + 2) + "px";
-            fullscreenButtons.flashReference.style.left = canvasOverlay.offsetLeft + "px";            
+            fullscreenButtons.flashReference.style.left = canvasOverlay.offsetLeft + "px";
 
             fullscreenButtons.zoomReference.style.top = (canvasOverlay.offsetTop + 2) + "px";
             fullscreenButtons.zoomReference.style.left = ((canvasOverlay.offsetWidth + canvasOverlay.offsetLeft) - fullscreenButtons.zoomReference.offsetWidth) + "px";
@@ -1838,7 +1839,7 @@ var MWBarcodeScanner = {
             viewfinderOnScreenView.height = canvasOverlay.height * (viewfinderUnionRect.height / 100);
 
             /**
-             * Your drawings need to be inside this function otherwise they will be reset when 
+             * Your drawings need to be inside this function otherwise they will be reset when
              * you resize the browser window and the canvas goes will be cleared.
              */
 
@@ -1914,7 +1915,7 @@ var MWBarcodeScanner = {
          * Creates a preview frame and necessary objects.
          */
         function createPreview() {
-			
+
             if (debug_print) console.log('createPreview ');
 
             // Create partial screen preview
@@ -1928,15 +1929,15 @@ var MWBarcodeScanner = {
             capturePreviewFrame = document.createElement('div');
             capturePreviewFrame.id = "root-div-inview";
             capturePreviewFrame.className = "barcode-scanner-wrap-inview";
-            
+
 			// FEATURE: can transform based on args[4] and sets capturePreviewFrame.style.cssText
             //anchorView_toOrientation(args[0], args[1], args[2], args[3], args[4], viewfinderOnScreenView.orientation); //TO BE REMOVED
             anchorView_toOrientation(partialView.x, partialView.y, partialView.width, partialView.height, partialView.orientation, viewfinderOnScreenView.orientation);
-            
+
             proxyWrapCapturePreview = document.createElement('div');
             proxyWrapCapturePreview.className = "proxy-wrap-of-preview-inview";
             proxyWrapCapturePreview.style.cssText = "width: 100%; height: 100%;";
-            
+
             capturePreview = document.createElement("video");
             capturePreview.id = "video-layer";
             capturePreview.className = "barcode-scanner-preview-inview";
@@ -1964,11 +1965,11 @@ var MWBarcodeScanner = {
             // obtain a ref
             mwBlinkingLines.v = canvasBlinkingLineV;
             mwBlinkingLines.h = canvasBlinkingLineH;
-			
+
             // SOLUTION: instead of calling resize and draw set just the style (turns out you can use animation-play-state)
 			canvasBlinkingLineV.style.backgroundColor = canvasBlinkingLineH.style.backgroundColor = mwOverlayProperties.lineColor;
 			canvasBlinkingLineV.style.animation = canvasBlinkingLineH.style.animation = "fadeColor " + mwOverlayProperties.blinkingRate + "ms infinite";
-			
+
 			// scanningRects need to be reset in the sdk //hereX
 			WindowsComponnent.BarcodeHelper.resetScanningRects();
 
@@ -1991,7 +1992,7 @@ var MWBarcodeScanner = {
 			        }
 			    }
 			}
-			
+
             initCodeMasksArray_and_untouchedScanningRectsArray_and_untouchedScanningRectsUnion(numberOfSupporedCodes);
 
             // PartialView FLash and Zoom Images
@@ -2154,7 +2155,7 @@ var MWBarcodeScanner = {
 
             focusControl.configure(focusConfig);
 
-            // Continuous focus should start only after preview has started. See 'Remarks' at 
+            // Continuous focus should start only after preview has started. See 'Remarks' at
             // https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.devices.focuscontrol.configure.aspx
             function waitForIsPlaying() {
                 var isPlaying = !capturePreview.paused && !capturePreview.ended && capturePreview.readyState > 2;
@@ -2210,7 +2211,7 @@ var MWBarcodeScanner = {
                             fullscreenButtons.flashReference.getElementsByTagName("img")[0].src = fullscreenButtons.flash0;
                         }
                     }, 100); //950XL: 39, 640: 50
-                   
+
                     /**/
                     //fullscreenButtons.flashReference.getElementsByTagName("img")[0].src = fullscreenButtons.flash0
                 }
@@ -2251,7 +2252,7 @@ var MWBarcodeScanner = {
                     zoomSettings.value = fullscreenButtons.zoomLevels[fullscreenButtons.zoom_lvl_ini];
 
                     zoomSettings.mode = zoomControlRef.supportedModes.first();
-                    zoomControlRef.configure(zoomSettings);														  
+                    zoomControlRef.configure(zoomSettings);
                     //fullscreenButtons.zoomReference.getElementsByTagName("img")[0].src = fullscreenButtons.zoom0;
                 }
                 else
@@ -2308,7 +2309,7 @@ var MWBarcodeScanner = {
                 document.body.appendChild(fullscreenButtons.zoomReference);
 
                 DOM_complete = true;
-				
+
                 calcPreview(false);
 				resizeCanvas();
 
@@ -2329,9 +2330,9 @@ var MWBarcodeScanner = {
         function destroyPreview() {
 
             Windows.Graphics.Display.DisplayInformation.getForCurrentView().removeEventListener("orientationchanged", updatePreviewForRotation, false);
-            //document.removeEventListener('backbutton', cancelPartial); 
+            //document.removeEventListener('backbutton', cancelPartial);
 			cancelPartial = null;
-			
+
             if (operatingSystem == 'WINDOWS')
             window.removeEventListener('resize', resizeCanvas, false);
 
@@ -2366,7 +2367,7 @@ var MWBarcodeScanner = {
          */
         cancelPartial = function cancelPreview() {
             reader && reader.stop();
-			
+
 			anyScannerStarted = false;
 			anyReader = null;
 			//document.getElementById("b1").disabled = false;
@@ -2402,12 +2403,12 @@ var MWBarcodeScanner = {
         })
         .done(function (result) {
             destroyPreview();
-			
+
 			anyScannerStarted = false;
 			anyReader = null;
 			//document.getElementById("b1").disabled = false;
 			//document.getElementById("b2").disabled = false;
-			
+
             /**
                * result.code - string representation of barcode result
                * result.type - type of barcode detected or 'Cancel' if scanning is canceled
